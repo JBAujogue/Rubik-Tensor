@@ -3,9 +3,20 @@
 
 ## Setup
 
+This project uses `miniconda` as environment manager, `python 3.12` as core interpreter, and `uv` as dependency manager. Install the project with
 
-## Usage
+```shell
+conda env create -f environment.yml
+conda activate rubiktensor
+uv sync
+uv run pre-commit install
+```
 
+## Basic usage
+
+```shell
+python -m rubik hello "World"
+```
 
 ## Roadmap
 

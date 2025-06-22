@@ -8,7 +8,7 @@ This project uses `uv` as environment & dependency manager, and `python 3.12` as
 ```shell
 uv venv
 uv sync
-uv run pre-commit install
+(Optional) pre-commit install
 ```
 
 ## Basic usage

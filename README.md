@@ -14,8 +14,20 @@ pre-commit install
 
 ## Basic usage
 
-```shell
-python -m rubik hello "World"
+```python
+from cubik import Cube
+
+cube = Cube.from_default(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+print(cube)
+#     UUU        
+#     UUU
+#     UUU
+# LLL CCC RRR BBB
+# LLL CCC RRR BBB
+# LLL CCC RRR BBB
+#     DDD
+#     DDD
+#     DDD
 ```
 
 ## Roadmap

@@ -26,9 +26,7 @@ class Cube:
             cube = Cube.from_default(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
         """
         assert (num := len(set(colors))) == 6, f"Expected 6 distinct colors, got {num}"
-        assert isinstance(size, int) and size > 1, (
-            f"Expected non-zero integrer size, got {size}"
-        )
+        assert isinstance(size, int) and size > 1, f"Expected non-zero integrer size, got {size}"
 
         # build tensor filled with 0's, and fill the faces with 1's
         n = size - 1
@@ -54,10 +52,7 @@ class Cube:
             self.tensor[:, n, :, 4, :].argmax(dim=-1),  # back
             self.tensor[:, :, 0, 5, :].argmax(dim=-1),  # down
         ]
-        return [
-            [[self.colors[i - 1] for i in row] for row in face.tolist()]
-            for face in grid
-        ]
+        return [[[self.colors[i - 1] for i in row] for row in face.tolist()] for face in grid]
 
     def __str__(self):
         """
@@ -79,10 +74,7 @@ class Cube:
         void = " " * self.size
         top = "\n".join(" ".join([void, "".join(row), void, void]) for row in grid[0])
         middle = "\n".join(
-            " ".join("".join(grid[face_i][row_i]) for face_i in range(1, 5))
-            for row_i in range(self.size)
+            " ".join("".join(grid[face_i][row_i]) for face_i in range(1, 5)) for row_i in range(self.size)
         )
-        bottom = "\n".join(
-            " ".join((void, "".join(row), void, void)) for row in grid[-1]
-        )
+        bottom = "\n".join(" ".join((void, "".join(row), void, void)) for row in grid[-1])
         return "\n".join([top, middle, bottom])

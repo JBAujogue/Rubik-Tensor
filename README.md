@@ -3,7 +3,7 @@
 
 ## Setup
 
-This project uses `uv` as environment & dependency manager, and `python 3.12` as core interpreter. Install the project with
+This project uses `uv 0.7.13` as environment & dependency manager, and `python 3.12` as core interpreter. Install the project with
 
 ```shell
 uv venv

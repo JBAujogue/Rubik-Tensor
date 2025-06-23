@@ -39,10 +39,11 @@ print(cube)
 
 ## Related projects
 
-- [pglass/cube](https://github.com/pglass/cube)
-- [trincaog/magiccube](https://github.com/trincaog/magiccube)
-- [bellerb/RubiksCube_Solver](https://github.com/bellerb/RubiksCube_Solver)
-- [charlstown/rubiks-cube-solver](https://github.com/charlstown/rubiks-cube-solver)
+Open-source projects related to Rubik's Cube, sorted by number of stars:
 - [adrianliaw/PyCuber](https://github.com/adrianliaw/PyCuber)
+- [pglass/cube](https://github.com/pglass/cube)
 - [dwalton76/rubiks-cube-NxNxN-solver](https://github.com/dwalton76/rubiks-cube-NxNxN-solver)
+- [bellerb/RubiksCube_Solver](https://github.com/bellerb/RubiksCube_Solver)
+- [trincaog/magiccube](https://github.com/trincaog/magiccube)
+- [charlstown/rubiks-cube-solver](https://github.com/charlstown/rubiks-cube-solver)
 - [staetyk/NxNxN-Cubes](https://github.com/staetyk/NxNxN-Cubes)

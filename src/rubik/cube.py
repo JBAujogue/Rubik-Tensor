@@ -14,7 +14,7 @@ class Cube:
         - Color (from 0 to 6, 0 being the "dark" color, the rest according to order given in "colors" attribute).
     """
 
-    tensor: torch.Tensor
+    state: torch.Tensor
     colors: list[str]
     size: int
 
@@ -30,29 +30,38 @@ class Cube:
 
         # build tensor filled with 0's, and fill the faces with 1's
         n = size - 1
-        tensor = torch.zeros([size, size, size, 6, 7], dtype=torch.int8)
-        tensor[:, :, n, 0, 1] = 1  # up
-        tensor[0, :, :, 1, 2] = 1  # left
-        tensor[:, 0, :, 2, 3] = 1  # front
-        tensor[n, :, :, 3, 4] = 1  # right
-        tensor[:, n, :, 4, 5] = 1  # back
-        tensor[:, :, 0, 5, 6] = 1  # down
-        return cls(tensor, colors, size)
+        state = torch.zeros([size, size, size, 6, 7], dtype=torch.int8)
+        state[:, :, n, 0, 1] = 1  # up
+        state[0, :, :, 1, 2] = 1  # left
+        state[:, 0, :, 2, 3] = 1  # front
+        state[n, :, :, 3, 4] = 1  # right
+        state[:, n, :, 4, 5] = 1  # back
+        state[:, :, 0, 5, 6] = 1  # down
+        return cls(state, colors, size)
 
-    def to_grid(self) -> list[list[list[str]]]:
+    @staticmethod
+    def pad_colors(colors: list[str]) -> list[str]:
+        """
+        Pad color names to strings of equal length.
+        """
+        max_len = max(len(c) for c in colors)
+        return [c + " " * (max_len - len(c)) for c in colors]
+
+    def to_grid(self, pad_colors: bool = False) -> list[list[list[str]]]:
         """
         Convert Cube into a 3D grid representation.
         """
         n = self.size - 1
+        colors = self.pad_colors(self.colors) if pad_colors else self.colors
         grid = [
-            self.tensor[:, :, n, 0, :].argmax(dim=-1),  # up
-            self.tensor[0, :, :, 1, :].argmax(dim=-1),  # left
-            self.tensor[:, 0, :, 2, :].argmax(dim=-1),  # front
-            self.tensor[n, :, :, 3, :].argmax(dim=-1),  # right
-            self.tensor[:, n, :, 4, :].argmax(dim=-1),  # back
-            self.tensor[:, :, 0, 5, :].argmax(dim=-1),  # down
+            self.state[:, :, n, 0, :].argmax(dim=-1),  # up
+            self.state[0, :, :, 1, :].argmax(dim=-1),  # left
+            self.state[:, 0, :, 2, :].argmax(dim=-1),  # front
+            self.state[n, :, :, 3, :].argmax(dim=-1),  # right
+            self.state[:, n, :, 4, :].argmax(dim=-1),  # back
+            self.state[:, :, 0, 5, :].argmax(dim=-1),  # down
         ]
-        return [[[self.colors[i - 1] for i in row] for row in face.tolist()] for face in grid]
+        return [[[colors[i - 1] for i in row] for row in face.tolist()] for face in grid]
 
     def __str__(self):
         """
@@ -70,11 +79,9 @@ class Cube:
             #     DDD
             #     DDD
         """
-        grid = self.to_grid()
-        void = " " * self.size
-        top = "\n".join(" ".join([void, "".join(row), void, void]) for row in grid[0])
-        middle = "\n".join(
-            " ".join("".join(grid[face_i][row_i]) for face_i in range(1, 5)) for row_i in range(self.size)
-        )
-        bottom = "\n".join(" ".join((void, "".join(row), void, void)) for row in grid[-1])
-        return "\n".join([top, middle, bottom])
+        grid = self.to_grid(pad_colors=True)
+        void = " " * max(len(c) for c in self.colors) * self.size
+        l1 = "\n".join(" ".join([void, "".join(row), void, void]) for row in grid[0])
+        l2 = "\n".join(" ".join("".join(grid[face_i][row_i]) for face_i in range(1, 5)) for row_i in range(self.size))
+        l3 = "\n".join(" ".join((void, "".join(row), void, void)) for row in grid[-1])
+        return "\n".join([l1, l2, l3])

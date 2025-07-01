@@ -17,7 +17,7 @@ pre-commit install
 ```python
 from rubik.cube import Cube
 
-cube = Cube.from_default(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+cube = Cube.create(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
 print(cube)
 #     UUU        
 #     UUU

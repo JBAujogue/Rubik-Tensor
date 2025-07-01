@@ -1,6 +1,4 @@
-from fire import Fire
-
-from rubik.hello import hello_world
+# from fire import Fire
 
 
-Fire({"hello": hello_world})
+# Fire({"hello": hello_world})

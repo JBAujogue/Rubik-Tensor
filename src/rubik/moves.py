@@ -43,9 +43,9 @@ POS_ROTATIONS = torch.stack(
 
 POS_SHIFTS = torch.tensor(
     [
-        [0, 0, 0, 2],
-        [0, 2, 0, 0],
-        [0, 0, 2, 0],
+        [0, 0, 0, 1],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
     ],
     dtype=INT8,
 )
@@ -124,7 +124,7 @@ def build_permunation_tensor(size: int, axis: int, slice: int, inverse: int) -> 
 
     # apply coordinate rotation
     rotated = POS_ROTATIONS[axis] @ extract  # size = (4, n)
-    offsets = POS_SHIFTS[axis].repeat(extract.shape[-1], 1).transpose(0, 1)  # size = (4, n)
+    offsets = (POS_SHIFTS[axis] * (size - 1)).repeat(extract.shape[-1], 1).transpose(0, 1)  # size = (4, n)
     rotated = rotated + offsets  # size = (4, n)
 
     # apply face rotation

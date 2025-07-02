@@ -135,6 +135,7 @@ def build_permunation_tensor(size: int, axis: int, slice: int, inverse: int) -> 
     inputs = inputs.transpose(0, 1).tolist()  # size = (n, 4)
     outputs = outputs.transpose(0, 1).tolist()  # size = (n, 4)
 
+    # compute position-based permutation of colors equivalent to rotation converting inputs into outputs
     local_to_total = dict(enumerate(indices.tolist()))
     total_to_local = {ind: i for i, ind in local_to_total.items()}
 
@@ -142,6 +143,8 @@ def build_permunation_tensor(size: int, axis: int, slice: int, inverse: int) -> 
     total_perm = {
         i: (i if i not in total_to_local else local_to_total[local_perm[total_to_local[i]]]) for i in range(length)
     }
+
+    # convert permutation dict into sparse tensor
     perm_indices = torch.tensor(
         [[axis] * length, [slice] * length, [inverse] * length, list(total_perm.keys()), list(total_perm.values())],
         dtype=INT8,

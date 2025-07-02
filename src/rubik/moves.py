@@ -135,18 +135,17 @@ def build_permunation_tensor(size: int, axis: int, slice: int, inverse: int) -> 
     inputs = inputs.transpose(0, 1).tolist()  # size = (n, 4)
     outputs = outputs.transpose(0, 1).tolist()  # size = (n, 4)
 
-    extract_to_coordinates = dict(enumerate(indices.tolist()))
-    coordinates_to_extract = {ind: i for i, ind in extract_to_coordinates.items()}
+    local_to_total = dict(enumerate(indices.tolist()))
+    total_to_local = {ind: i for i, ind in local_to_total.items()}
 
-    extract_perm = {i: inputs.index(outputs[i]) for i in range(len(inputs))}
-    global_perm = {
-        i: (i if i not in coordinates_to_extract else extract_to_coordinates[extract_perm[coordinates_to_extract[i]]])
-        for i in range(length)
+    local_perm = {i: inputs.index(outputs[i]) for i in range(len(inputs))}
+    total_perm = {
+        i: (i if i not in total_to_local else local_to_total[local_perm[total_to_local[i]]]) for i in range(length)
     }
     perm_indices = torch.tensor(
-        [[axis] * length, [slice] * length, [inverse] * length, list(global_perm.keys()), list(global_perm.values())],
+        [[axis] * length, [slice] * length, [inverse] * length, list(total_perm.keys()), list(total_perm.values())],
         dtype=INT8,
     )
-    perm_values = torch.tensor([1] * length)
+    perm_values = torch.tensor([1] * length, dtype=INT8)
     perm_size = (3, size, 2, length, length)
     return torch.sparse_coo_tensor(indices=perm_indices, values=perm_values, size=perm_size, dtype=INT8)

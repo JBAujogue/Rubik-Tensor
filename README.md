@@ -32,10 +32,21 @@ print(cube)
 
 ## Roadmap
 
-- Fully tensorized Rubik Cube model (states, actions) running on cuda.
-- Base solvers following rule-based policies.
-- Visualization interface.
-- Movement explorer: Explore result of an input sequences of moves, find sequences of moves satisfying input constrains.
+#### Fully tensorized Rubik Cube model
+
+- ☑️ Tensorized states.
+- ☑️ Tensorized actions.
+- ⬜ Tensor operations moved to cuda.
+
+#### Movement explorer
+
+- ⬜ Explore result of an input sequences of moves.
+- ⬜ Find sequences of moves satisfying input constrains.
+
+#### Base solvers following rule-based policies
+
+#### Visualization interface
+
 
 ## Related projects
 

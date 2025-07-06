@@ -53,6 +53,7 @@ cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
 
 - ☑️ Tensorized states.
 - ☑️ Tensorized actions.
+- ☑️ Interface for performing actions.
 - ⬜ Tensor operations moved to cuda.
 
 #### Movement explorer

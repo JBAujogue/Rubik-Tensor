@@ -2,6 +2,10 @@ from dataclasses import dataclass
 
 import torch
 
+from rubik.action import build_actions_tensor, parse_action_str, sample_actions_str
+from rubik.display import stringify
+from rubik.tensor_utils import build_cube_tensor
+
 
 @dataclass
 class Cube:
@@ -18,6 +22,8 @@ class Cube:
 
     coordinates: torch.Tensor
     state: torch.Tensor
+    actions: torch.Tensor
+    history: list[list[int]]
     colors: list[str]
     size: int
 
@@ -28,66 +34,55 @@ class Cube:
         Example:
             cube = Cube.create(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
         """
-        assert (num := len(set(colors))) == 6, f"Expected 6 distinct colors, got {num}"
-        assert isinstance(size, int) and size > 1, f"Expected non-zero integrer size, got {size}"
-
-        # build dense tensor filled with colors
-        n = size - 1
-        tensor = torch.zeros([6, size, size, size], dtype=torch.int8)
-        tensor[0, :, :, n] = 1  # up
-        tensor[1, 0, :, :] = 2  # left
-        tensor[2, :, n, :] = 3  # front
-        tensor[3, n, :, :] = 4  # right
-        tensor[4, :, 0, :] = 5  # back
-        tensor[5, :, :, 0] = 6  # down
-        return cls.from_sparse(tensor.to_sparse(), colors, size)
-
-    def shuffle(self, num_moves: int):
-        raise NotImplementedError
-
-    def rotate(self, moves: str):
-        raise NotImplementedError
-
-    def solve(slef, policy: str):
-        raise NotImplementedError
-
-    @staticmethod
-    def pad_colors(colors: list[str]) -> list[str]:
-        """
-        Pad color names to strings of equal length.
-        """
-        max_len = max(len(c) for c in colors)
-        return [c + " " * (max_len - len(c)) for c in colors]
-
-    @classmethod
-    def from_sparse(cls, tensor: torch.Tensor, colors: list[str], size: int) -> "Cube":
-        """
-        Gather cube attributes into a torch sparse tensor.
-        """
+        tensor = build_cube_tensor(colors, size)
         coordinates = tensor.indices().transpose(0, 1).to(torch.int8)
         values = tensor.values()
-        return cls(coordinates, values, colors, size)
+        actions = build_actions_tensor(size)
+        history: list[list[int]] = []
+        return cls(coordinates, values, actions, history, colors, size)
 
-    def to_sparse(self) -> torch.Tensor:
+    def reset_history(self) -> None:
         """
-        Gather cube attributes into a torch sparse tensor.
+        Reset internal history of moves.
         """
-        return torch.sparse_coo_tensor(
-            indices=self.coordinates.transpose(0, 1),
-            values=self.state,
-            size=(6, self.size, self.size, self.size),
-            dtype=torch.int8,
-        )
+        self.history = []
+        return
+
+    def shuffle(self, num_moves: int, seed: int = 0) -> None:
+        """
+        Randomly shuffle the cube by the supplied number of steps, and reset history of moves.
+        """
+        moves = sample_actions_str(num_moves, self.size, seed=seed)
+        self.rotate(moves)
+        self.reset_history()
+        return
+
+    def rotate(self, moves: str) -> None:
+        """
+        Apply a sequence of moves (defined as plain string) to the cube.
+        """
+        actions = [parse_action_str(move) for move in moves.strip().split()]
+        for action in actions:
+            self.rotate_once(*action)
+        return
+
+    def rotate_once(self, axis: int, slice: int, inverse: int) -> None:
+        """
+        Apply a move (defined as 3 coordinates) to the cube.
+        """
+        action = self.actions[axis, slice, inverse]
+        self.state = action @ self.state
+        self.history.append([axis, slice, inverse])
+        return
+
+    def solve(self, policy: str) -> None:
+        """
+        Apply the specified solving policy to the cube.
+        """
+        raise NotImplementedError
 
     def __str__(self):
         """
         Compute a string representation of a cube.
         """
-        colors = self.pad_colors(self.colors)
-        faces = self.state.reshape(6, self.size, self.size).transpose(1, 2)
-        faces = [[[colors[i - 1] for i in row] for row in face.tolist()] for face in faces]
-        void = " " * max(len(c) for c in self.colors) * self.size
-        l1 = "\n".join(" ".join([void, "".join(row), void, void]) for row in faces[0])
-        l2 = "\n".join(" ".join("".join(face[i]) for face in faces[1:5]) for i in range(self.size))
-        l3 = "\n".join(" ".join((void, "".join(row), void, void)) for row in faces[-1])
-        return "\n".join([l1, l2, l3])
+        return stringify(self)

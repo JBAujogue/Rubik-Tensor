@@ -12,7 +12,9 @@ uv sync
 pre-commit install
 ```
 
-## Basic usage
+## Usage
+
+### Create a cube
 
 ```python
 from rubik.cube import Cube
@@ -28,6 +30,20 @@ print(cube)
 #     DDD
 #     DDD
 #     DDD
+```
+
+### Perform basic moves
+
+```python
+# shuffle the cube using 1000 random moves
+cube.shuffle(num_moves=1000, seed=0)
+print(cube)
+print(cube.history)
+
+# rotate it in some way
+cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
+print(cube)
+print(cube.history)
 ```
 
 ## Roadmap

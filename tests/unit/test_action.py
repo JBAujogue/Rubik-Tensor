@@ -10,9 +10,12 @@ from rubik.action import (
 
 
 def test_position_rotation_shape():
+    """
+    Test that POS_ROTATIONS has expected shape.
+    """
     expected = (3, 4, 4)
     observed = POS_ROTATIONS.shape
-    assert expected == observed, f"Position rotation tensor expected shape '{expected}', but got '{observed}' instead"
+    assert expected == observed, f"Position rotation tensor expected shape '{expected}', got '{observed}' instead"
 
 
 @pytest.mark.parametrize(

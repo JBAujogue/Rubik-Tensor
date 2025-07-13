@@ -1,13 +1,13 @@
-from dataclasses import dataclass
+from loguru import logger
 
 import torch
+import torch.nn.functional as F
 
 from rubik.action import build_actions_tensor, parse_action_str, sample_actions_str
 from rubik.display import stringify
 from rubik.tensor_utils import build_cube_tensor
 
 
-@dataclass
 class Cube:
     """
     A 4D tensor filled with colors. Dimensions have the following interpretation:
@@ -20,26 +20,28 @@ class Cube:
     the rest according to order given in "colors" attribute.
     """
 
-    coordinates: torch.Tensor
-    state: torch.Tensor
-    actions: torch.Tensor
-    history: list[list[int]]
-    colors: list[str]
-    size: int
-
-    @classmethod
-    def create(cls, colors: list[str], size: int) -> "Cube":
+    def __init__(self, colors: list[str], size: int):
         """
         Create Cube from a given list of 6 colors and size.
         Example:
-            cube = Cube.create(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+            cube = Cube(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
         """
         tensor = build_cube_tensor(colors, size)
-        coordinates = tensor.indices().transpose(0, 1).to(torch.int8)
-        values = tensor.values()
-        actions = build_actions_tensor(size)
-        history: list[list[int]] = []
-        return cls(coordinates, values, actions, history, colors, size)
+        self.coordinates = tensor.indices().transpose(0, 1).to(torch.int8)
+        self.state = F.one_hot(tensor.values().long()).to(torch.int8)
+        self.actions = build_actions_tensor(size)
+        self.history: list[list[int]] = []
+        self.colors = colors
+        self.size = size
+
+    def to(self, device: str | torch.device) -> "Cube":
+        device = torch.device(device)
+        dtype = torch.int8 if device == torch.device("cpu") else torch.float32
+        self.coordinates = self.coordinates.to(device=device, dtype=dtype)
+        self.state = self.state.to(device=device, dtype=dtype)
+        self.actions = self.actions.to(device=device, dtype=dtype)
+        logger.info(f"Using device '{self.state.device}' and dtype '{dtype}'")
+        return self
 
     def reset_history(self) -> None:
         """
@@ -85,4 +87,4 @@ class Cube:
         """
         Compute a string representation of a cube.
         """
-        return stringify(self)
+        return stringify(self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int8), self.colors, self.size)

@@ -1,9 +1,10 @@
+from functools import reduce
 from loguru import logger
 
 import torch
 import torch.nn.functional as F
 
-from rubik.action import build_actions_tensor, parse_action_str, sample_actions_str
+from rubik.action import build_actions_tensor, parse_actions_str, sample_actions_str
 from rubik.display import stringify
 from rubik.tensor_utils import build_cube_tensor
 
@@ -63,7 +64,7 @@ class Cube:
         """
         Apply a sequence of moves (defined as plain string) to the cube.
         """
-        actions = [parse_action_str(move) for move in moves.strip().split()]
+        actions = parse_actions_str(moves)
         for action in actions:
             self.rotate_once(*action)
         return
@@ -77,6 +78,15 @@ class Cube:
         self.history.append([axis, slice, inverse])
         return
 
+    def compute_changes(self, moves: str) -> dict[int, int]:
+        """
+        combine a sequence of moves and return the resulting changes.
+        """
+        actions = parse_actions_str(moves)
+        tensors = [self.actions[*action].to(torch.float32) for action in actions]
+        result = reduce(lambda A, B: A @ B, tensors).to(torch.int8)
+        return dict(result.indices().transpose(0, 1).tolist())
+
     def solve(self, policy: str) -> None:
         """
         Apply the specified solving policy to the cube.
@@ -87,4 +97,5 @@ class Cube:
         """
         Compute a string representation of a cube.
         """
-        return stringify(self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int8), self.colors, self.size)
+        state = self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int8)
+        return stringify(state, self.colors, self.size)

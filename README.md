@@ -7,7 +7,7 @@ This project uses `uv 0.7` as environment & dependency manager, and `python 3.11
 
 ```shell
 uv venv
-(Activate env)
+-- Activate env --
 uv sync
 pre-commit install
 ```
@@ -54,16 +54,17 @@ cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
 - ☑️ Tensorized states.
 - ☑️ Tensorized actions.
 - ☑️ Interface for performing actions.
-- ⬜ Tensor operations moved to cuda.
 
 #### Movement explorer
 
-- ⬜ Explore result of an input sequences of moves.
-- ⬜ Find sequences of moves satisfying input constrains.
+- ⬜ Explore changes resulting from a sequences of moves.
+- ⬜ Find least sequences of moves satisfying some input constrains.
+
+#### Visualization interface
 
 #### Base solvers following rule-based policies
 
-#### Visualization interface
+
 
 
 ## Related projects

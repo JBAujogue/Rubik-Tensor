@@ -40,7 +40,7 @@ print(cube.history)
 ### Perform basic moves
 
 ```python
-# shuffle the cube using 1000 random moves
+# shuffle the cube using 1000 random moves (random shuffling resets the history)
 cube.shuffle(num_moves=1000, seed=0)
 
 # rotate it in some way

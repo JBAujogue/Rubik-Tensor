@@ -37,7 +37,13 @@ class Cube:
 
     def to(self, device: str | torch.device) -> "Cube":
         device = torch.device(device)
-        dtype = torch.int16 if device == torch.device("cpu") else torch.float32
+        dtype = (
+            self.state.dtype
+            if self.state.device == device
+            else torch.int16
+            if device == torch.device("cpu")
+            else torch.float32
+        )
         self.coordinates = self.coordinates.to(device=device, dtype=dtype)
         self.state = self.state.to(device=device, dtype=dtype)
         self.actions = self.actions.to(device=device, dtype=dtype)
@@ -84,14 +90,8 @@ class Cube:
         """
         actions = parse_actions_str(moves)
         tensors = [self.actions[*action].to(torch.float32) for action in actions]
-        result = reduce(lambda A, B: A @ B, tensors).to(torch.int16)
+        result = reduce(lambda A, B: B @ A, tensors).to(torch.int16).coalesce()
         return dict(result.indices().transpose(0, 1).tolist())
-
-    def solve(self, policy: str) -> None:
-        """
-        Apply the specified solving policy to the cube.
-        """
-        raise NotImplementedError
 
     def __str__(self):
         """

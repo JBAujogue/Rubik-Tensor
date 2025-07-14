@@ -31,11 +31,17 @@ class TestCube:
 
     @pytest.mark.parametrize("device", ["cpu"])
     def test_to(self, device: str | torch.device):
+        """
+        Test that the .to method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         cube_2 = cube.to(device)
         assert torch.equal(cube.state, cube_2.state), "cube has different state after calling 'to' method"
 
     def test_reset_history(self):
+        """
+        Test that the .reset_history method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         cube.rotate("X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i")
         cube.reset_history()
@@ -43,6 +49,9 @@ class TestCube:
 
     @pytest.mark.parametrize("num_moves, seed", [[50, 42]])
     def test_shuffle(self, num_moves: int, seed: int):
+        """
+        Test that the .shuffle method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         cube_state = cube.state.clone()
         cube.shuffle(num_moves, seed)
@@ -57,6 +66,9 @@ class TestCube:
         ],
     )
     def test_rotate(self, moves: str):
+        """
+        Test that the .rotate method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         cube_state = cube.state.clone()
         cube.rotate(moves)
@@ -72,6 +84,9 @@ class TestCube:
         ],
     )
     def test_rotate_once(self, axis: int, slice: int, inverse: int):
+        """
+        Test that the .rotate_once method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         cube_state = cube.state.clone()
         cube.rotate_once(axis, slice, inverse)
@@ -86,6 +101,9 @@ class TestCube:
         ],
     )
     def test_compute_changes(self, moves: str):
+        """
+        Test that the .compute_changes method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         facets = cube.state.argmax(dim=-1).to(torch.int16).tolist()
         changes = cube.compute_changes(moves)
@@ -101,6 +119,9 @@ class TestCube:
         assert expected == observed, "method 'compute_changes' does not behave correctly: "
 
     def test__str__(self):
+        """
+        Test that the __str__ method behaves as expected.
+        """
         cube = Cube(colors=["U", "L", "C", "R", "B", "D"], size=3)
         repr = str(cube)
         assert len(repr), "__str__ method returns an empty representation"

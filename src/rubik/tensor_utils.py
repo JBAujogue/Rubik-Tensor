@@ -28,4 +28,4 @@ def build_permutation_matrix(size: int, perm: str) -> torch.Tensor:
     perm_dict = {perm_list[i]: perm_list[i + 1] for i in range(len(perm))}
     indices = torch.tensor([list(range(size)), [(perm_dict.get(i, i)) for i in range(size)]], dtype=torch.int16)
     values = torch.tensor([1] * size, dtype=torch.int16)
-    return torch.sparse_coo_tensor(indices=indices, values=values, size=(size, size), dtype=torch.int16)
+    return torch.sparse_coo_tensor(indices=indices, values=values, size=(size, size), dtype=torch.int16).coalesce()

@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -123,17 +125,20 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     return torch.sparse_coo_tensor(indices=perm_indices, values=perm_values, size=perm_size, dtype=torch.int16)
 
 
-def parse_action_str(move: str) -> tuple[int, ...]:
+def parse_action_str(move: str) -> tuple[int, int, int]:
     """
     Convert the name of an action into a triple (axis, slice, inverse).
     Examples:
         'X1'  -> (0, 1, 0)
         'X2i' -> (0, 2, 1)
     """
-    return ("XYZ".index(move[0]), int(move[1]), int(len(move) >= 3))
+    axis = "XYZ".index(move[0])
+    slice = int(re.findall(r"^\d+", move[1:])[0])
+    inverse = int(len(move) > (1 + len(str(slice))))
+    return (axis, slice, inverse)
 
 
-def parse_actions_str(moves: str) -> list[tuple[int, ...]]:
+def parse_actions_str(moves: str) -> list[tuple[int, int, int]]:
     """
     Convert a sequence of actions in a string into a list of triples (axis, slice, inverse).
     Examples:

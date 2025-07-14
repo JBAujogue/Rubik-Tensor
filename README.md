@@ -19,7 +19,7 @@ pre-commit install
 ```python
 from rubik.cube import Cube
 
-cube = Cube(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+cube = Cube(colors=['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
 
 # display the cube state and history of moves
 print(cube)

@@ -29,7 +29,7 @@ class Cube:
         """
         tensor = build_cube_tensor(colors, size)
         self.coordinates = tensor.indices().transpose(0, 1).to(torch.int16)
-        self.state = F.one_hot(tensor.values().long()).to(torch.int16)
+        self.state = F.one_hot(tensor.values().long(), num_classes=7).to(torch.int16)
         self.actions = build_actions_tensor(size)
         self.history: list[list[int]] = []
         self.colors = colors

@@ -28,8 +28,8 @@ class Cube:
             cube = Cube(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
         """
         tensor = build_cube_tensor(colors, size)
-        self.coordinates = tensor.indices().transpose(0, 1).to(torch.int8)
-        self.state = F.one_hot(tensor.values().long()).to(torch.int8)
+        self.coordinates = tensor.indices().transpose(0, 1).to(torch.int16)
+        self.state = F.one_hot(tensor.values().long()).to(torch.int16)
         self.actions = build_actions_tensor(size)
         self.history: list[list[int]] = []
         self.colors = colors
@@ -37,7 +37,7 @@ class Cube:
 
     def to(self, device: str | torch.device) -> "Cube":
         device = torch.device(device)
-        dtype = torch.int8 if device == torch.device("cpu") else torch.float32
+        dtype = torch.int16 if device == torch.device("cpu") else torch.float32
         self.coordinates = self.coordinates.to(device=device, dtype=dtype)
         self.state = self.state.to(device=device, dtype=dtype)
         self.actions = self.actions.to(device=device, dtype=dtype)
@@ -84,7 +84,7 @@ class Cube:
         """
         actions = parse_actions_str(moves)
         tensors = [self.actions[*action].to(torch.float32) for action in actions]
-        result = reduce(lambda A, B: A @ B, tensors).to(torch.int8)
+        result = reduce(lambda A, B: A @ B, tensors).to(torch.int16)
         return dict(result.indices().transpose(0, 1).tolist())
 
     def solve(self, policy: str) -> None:
@@ -97,5 +97,5 @@ class Cube:
         """
         Compute a string representation of a cube.
         """
-        state = self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int8)
+        state = self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int16)
         return stringify(state, self.colors, self.size)

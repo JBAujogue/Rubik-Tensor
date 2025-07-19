@@ -10,7 +10,7 @@ class TestCube:
     A testing class for the Cube class.
     """
 
-    @pytest.mark.parametrize("size", [3, 5, 10])
+    @pytest.mark.parametrize("size", [3, 5, 10, 25])
     def test__init__(self, size: int):
         """
         Test that the __init__ method produce expected attributes.

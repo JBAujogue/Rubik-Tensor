@@ -17,7 +17,7 @@ POS_ROTATIONS = torch.stack(
                 [0, 0, 0, 1],
                 [0, 0, -1, 0],
             ],
-            dtype=torch.int16,
+            dtype=torch.int32,
         ),
         # rot about Y: X -> Z
         torch.tensor(
@@ -27,7 +27,7 @@ POS_ROTATIONS = torch.stack(
                 [0, 0, 1, 0],
                 [0, 1, 0, 0],
             ],
-            dtype=torch.int16,
+            dtype=torch.int32,
         ),
         # rot about Z: Y -> X
         torch.tensor(
@@ -37,7 +37,7 @@ POS_ROTATIONS = torch.stack(
                 [0, -1, 0, 0],
                 [0, 0, 0, 1],
             ],
-            dtype=torch.int16,
+            dtype=torch.int32,
         ),
     ]
 )
@@ -48,7 +48,7 @@ POS_SHIFTS = torch.tensor(
         [0, 1, 0, 0],
         [0, 0, 1, 0],
     ],
-    dtype=torch.int16,
+    dtype=torch.int32,
 )
 
 
@@ -76,7 +76,7 @@ def build_actions_tensor(size: int) -> torch.Tensor:
             for inverse in range(2)
         ],
         dim=0,
-    ).sum(dim=0, dtype=torch.int16)
+    ).sum(dim=0, dtype=torch.int32)
 
 
 def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch.Tensor:
@@ -85,11 +85,11 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     is the rotation along the specified axis, within the specified slice and the specified
     orientation.
     """
-    tensor = build_cube_tensor(size)
+    tensor = build_cube_tensor(size).to(dtype=torch.int32)
     length = 6 * (size**2)
 
     # extract faces impacted by the move
-    indices = tensor.indices().to(dtype=torch.int16)  # size = (4, length)
+    indices = tensor.indices().to(dtype=torch.int32)  # size = (4, length)
     changes = (indices[axis + 1] == slice).nonzero().reshape(-1)  # size = (n,), n < length
     extract = indices[:, changes]  # size = (4, n)
 
@@ -99,7 +99,7 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     rotated = rotated + offsets  # size = (4, n)
 
     # apply face rotation
-    rotated[0] = (F.one_hot(rotated[0].long(), num_classes=6).to(torch.int16) @ FACE_ROTATIONS[axis]).argmax(dim=-1)
+    rotated[0] = (F.one_hot(rotated[0].long(), num_classes=6).to(torch.int32) @ FACE_ROTATIONS[axis]).argmax(dim=-1)
 
     # from this point on, convert rotation into a position-based permutation of colors
     (inputs, outputs) = (rotated, extract) if bool(inverse) else (extract, rotated)
@@ -124,11 +124,11 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
             list(total_perm.keys()),
             list(total_perm.values()),
         ],
-        dtype=torch.int16,
+        dtype=torch.int32,
     )
-    perm_values = torch.tensor([1] * length, dtype=torch.int16)
+    perm_values = torch.tensor([1] * length, dtype=torch.int32)
     perm_size = (3, size, 2, length, length)
-    return torch.sparse_coo_tensor(indices=perm_indices, values=perm_values, size=perm_size, dtype=torch.int16)
+    return torch.sparse_coo_tensor(indices=perm_indices, values=perm_values, size=perm_size, dtype=torch.int32)
 
 
 def parse_action_str(move: str) -> tuple[int, int, int]:

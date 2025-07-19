@@ -24,7 +24,7 @@ class Cube:
         """
         Create Cube of a given size.
         """
-        self.dtype = torch.int8 if size <= 7 else torch.int16
+        self.dtype = torch.int8 if size <= 6 else torch.int16 if size <= 73 else torch.int32
         self.state = F.one_hot(build_cube_tensor(size).values().long(), num_classes=7).to(self.dtype)
         self.actions = build_actions_tensor(size).to(self.dtype)
         self._history: list[tuple[int, int, int]] = []

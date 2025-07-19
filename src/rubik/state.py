@@ -9,7 +9,7 @@ def build_cube_tensor(size: int) -> torch.Tensor:
 
     # build dense tensor filled with colors
     n = size - 1
-    tensor = torch.zeros([6, size, size, size], dtype=torch.int16)
+    tensor = torch.zeros([6, size, size, size], dtype=torch.int32)
     tensor[0, :, :, n] = 1  # up
     tensor[1, 0, :, :] = 2  # left
     tensor[2, :, n, :] = 3  # front
@@ -25,6 +25,6 @@ def build_permutation_matrix(size: int, perm: str) -> torch.Tensor:
     """
     perm_list = [int(p) for p in (perm + perm[0])]
     perm_dict = {perm_list[i]: perm_list[i + 1] for i in range(len(perm))}
-    indices = torch.tensor([list(range(size)), [(perm_dict.get(i, i)) for i in range(size)]], dtype=torch.int16)
-    values = torch.tensor([1] * size, dtype=torch.int16)
-    return torch.sparse_coo_tensor(indices=indices, values=values, size=(size, size), dtype=torch.int16).coalesce()
+    indices = torch.tensor([list(range(size)), [(perm_dict.get(i, i)) for i in range(size)]], dtype=torch.int32)
+    values = torch.tensor([1] * size, dtype=torch.int32)
+    return torch.sparse_coo_tensor(indices=indices, values=values, size=(size, size), dtype=torch.int32).coalesce()

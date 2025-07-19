@@ -110,7 +110,7 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     local_to_total = dict(enumerate(changes.tolist()))
     total_to_local = {ind: i for i, ind in local_to_total.items()}
 
-    local_perm = {i: inputs.index(outputs[i]) for i in range(len(inputs))}
+    local_perm = {i: outputs.index(inputs[i]) for i in range(len(inputs))}
     total_perm = {
         i: (i if i not in total_to_local else local_to_total[local_perm[total_to_local[i]]]) for i in range(length)
     }

@@ -25,9 +25,9 @@ python -m rubik demo
 ```python
 from rubik.cube import Cube
 
-cube = Cube(colors=['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+cube = Cube(size=3)
 
-# display the cube state and history of moves
+# display cube state
 print(cube)
 #     UUU        
 #     UUU
@@ -39,13 +39,14 @@ print(cube)
 #     DDD
 #     DDD
 
+# display history of moves
 print(cube.history)
 # []
 
-# shuffle the cube using 1000 random moves (random shuffling resets the history)
-cube.shuffle(num_moves=1000, seed=0)
+# scramble the cube using 1000 random moves (this resets the history)
+cube.scramble(num_moves=1000, seed=0)
 
-# rotate it in some way
+# rotate it in some way (this gets appended to history)
 cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
 ```
 

@@ -24,8 +24,11 @@ class Cube:
         """
         Create Cube of a given size.
         """
+        tensor = build_cube_tensor(size)
+
         self.dtype = torch.int8 if size <= 6 else torch.int16 if size <= 73 else torch.int32
-        self.state = F.one_hot(build_cube_tensor(size).values().long(), num_classes=7).to(self.dtype)
+        self.coordinates = tensor.indices().to(self.dtype)
+        self.state = F.one_hot(tensor.values().long(), num_classes=7).to(self.dtype)
         self.actions = build_actions_tensor(size).to(self.dtype)
         self._history: list[tuple[int, int, int]] = []
         self._colors: list[str] = list("ULCRBD")
@@ -49,12 +52,22 @@ class Cube:
         Return the list of faces of the cube, each given by a list of rows,
         each given by a list of facelets.
         """
-        faces = (
-            self.state.argmax(dim=-1)
-            .to(device="cpu", dtype=self.dtype)
-            .reshape(6, self.size, self.size)
-            .transpose(1, 2)
-        )
+        tensor = torch.sparse_coo_tensor(
+            indices=self.coordinates,
+            values=self.state.argmax(dim=-1),
+            size=(6, self.size, self.size, self.size),
+            dtype=self.dtype,
+        ).to_dense()
+
+        n = self.size - 1
+        faces = [
+            tensor[0, :, :, n].transpose(0, 1),  # up
+            tensor[1, 0, :, :].flip(1).transpose(0, 1),  # left
+            tensor[2, :, n, :].flip(1).transpose(0, 1),  # front
+            tensor[3, n, :, :].flip(0).flip(1).transpose(0, 1),  # right
+            tensor[4, :, 0, :].flip(0).flip(1).transpose(0, 1),  # back
+            tensor[5, :, :, 0].flip(1).transpose(0, 1),  # down
+        ]
         return [[[self.colors[i - 1] for i in row] for row in face.tolist()] for face in faces]
 
     def to(self, device: str | torch.device) -> "Cube":

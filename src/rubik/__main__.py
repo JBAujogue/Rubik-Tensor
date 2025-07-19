@@ -1,4 +1,6 @@
-# from fire import Fire
+from fire import Fire
+
+from rubik.layout.demo import demo
 
 
-# Fire({"hello": hello_world})
+Fire({"demo": demo})

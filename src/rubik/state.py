@@ -1,11 +1,10 @@
 import torch
 
 
-def build_cube_tensor(colors: list[str], size: int) -> torch.Tensor:
+def build_cube_tensor(size: int) -> torch.Tensor:
     """
     Convert a list of 6 colors and size into a sparse 4D tensor representing a cube.
     """
-    assert (num := len(set(colors))) == 6, f"Expected 6 distinct colors, got {num}"
     assert isinstance(size, int) and size > 1, f"Expected non-zero integrer size, got {size}"
 
     # build dense tensor filled with colors

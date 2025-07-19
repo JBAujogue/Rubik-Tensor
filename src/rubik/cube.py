@@ -5,8 +5,7 @@ import torch
 import torch.nn.functional as F
 
 from rubik.action import build_actions_tensor, parse_actions_str, sample_actions_str
-from rubik.display import stringify
-from rubik.tensor_utils import build_cube_tensor
+from rubik.state import build_cube_tensor
 
 
 class Cube:
@@ -21,30 +20,52 @@ class Cube:
     the rest according to order given in "colors" attribute.
     """
 
-    def __init__(self, colors: list[str], size: int):
+    def __init__(self, size: int):
         """
-        Create Cube from a given list of 6 colors and size.
-        Example:
-            cube = Cube(['U', 'L', 'C', 'R', 'B', 'D'], size = 3)
+        Create Cube of a given size.
         """
-        tensor = build_cube_tensor(colors, size)
-        self.coordinates = tensor.indices().transpose(0, 1).to(torch.int16)
-        self.state = F.one_hot(tensor.values().long(), num_classes=7).to(torch.int16)
-        self.actions = build_actions_tensor(size)
-        self.history: list[list[int]] = []
-        self.colors = colors
-        self.size = size
+        self.dtype = torch.int8 if size <= 7 else torch.int16
+        self.state = F.one_hot(build_cube_tensor(size).values().long(), num_classes=7).to(self.dtype)
+        self.actions = build_actions_tensor(size).to(self.dtype)
+        self._history: list[tuple[int, int, int]] = []
+        self._colors: list[str] = list("ULCRBD")
+        self._size: int = size
+
+    @property
+    def history(self) -> list[tuple[int, int, int]]:
+        return self._history
+
+    @property
+    def colors(self) -> list[str]:
+        return self._colors
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @property
+    def facelets(self) -> list[list[list[str]]]:
+        """
+        Return the list of faces of the cube, each given by a list of rows,
+        each given by a list of facelets.
+        """
+        faces = (
+            self.state.argmax(dim=-1)
+            .to(device="cpu", dtype=self.dtype)
+            .reshape(6, self.size, self.size)
+            .transpose(1, 2)
+        )
+        return [[[self.colors[i - 1] for i in row] for row in face.tolist()] for face in faces]
 
     def to(self, device: str | torch.device) -> "Cube":
         device = torch.device(device)
         dtype = (
             self.state.dtype
             if self.state.device == device
-            else torch.int16
+            else self.dtype
             if device == torch.device("cpu")
             else torch.float32
         )
-        self.coordinates = self.coordinates.to(device=device, dtype=dtype)
         self.state = self.state.to(device=device, dtype=dtype)
         self.actions = self.actions.to(device=device, dtype=dtype)
         logger.info(f"Using device '{self.state.device}' and dtype '{dtype}'")
@@ -54,10 +75,10 @@ class Cube:
         """
         Reset internal history of moves.
         """
-        self.history = []
+        self._history = []
         return
 
-    def shuffle(self, num_moves: int, seed: int = 0) -> None:
+    def scramble(self, num_moves: int, seed: int = 0) -> None:
         """
         Randomly shuffle the cube by the supplied number of steps, and reset history of moves.
         """
@@ -81,7 +102,7 @@ class Cube:
         """
         action = self.actions[axis, slice, inverse]
         self.state = action @ self.state
-        self.history.append([axis, slice, inverse])
+        self._history.append((axis, slice, inverse))
         return
 
     def compute_changes(self, moves: str) -> dict[int, int]:
@@ -97,5 +118,9 @@ class Cube:
         """
         Compute a string representation of a cube.
         """
-        state = self.state.argmax(dim=-1).to(device="cpu", dtype=torch.int16)
-        return stringify(state, self.colors, self.size)
+        space = " " * self.size
+        facelets = self.facelets
+        l1 = "\n".join(" ".join([space, "".join(row), space, space]) for row in facelets[0])
+        l2 = "\n".join(" ".join("".join(face[i]) for face in facelets[1:5]) for i in range(self.size))
+        l3 = "\n".join(" ".join((space, "".join(row), space, space)) for row in facelets[-1])
+        return "\n".join([l1, l2, l3])

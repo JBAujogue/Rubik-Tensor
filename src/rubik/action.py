@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from rubik.tensor_utils import build_permutation_matrix, build_cube_tensor
+from rubik.state import build_permutation_matrix, build_cube_tensor
 
 
 POS_ROTATIONS = torch.stack(
@@ -85,7 +85,7 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     is the rotation along the specified axis, within the specified slice and the specified
     orientation.
     """
-    tensor = build_cube_tensor(colors=list("ULCRBD"), size=size)
+    tensor = build_cube_tensor(size)
     length = 6 * (size**2)
 
     # extract faces impacted by the move
@@ -117,7 +117,13 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
 
     # convert permutation dict into sparse tensor
     perm_indices = torch.tensor(
-        [[axis] * length, [slice] * length, [inverse] * length, list(total_perm.keys()), list(total_perm.values())],
+        [
+            [axis] * length,
+            [slice] * length,
+            [inverse] * length,
+            list(total_perm.keys()),
+            list(total_perm.values()),
+        ],
         dtype=torch.int16,
     )
     perm_values = torch.tensor([1] * length, dtype=torch.int16)

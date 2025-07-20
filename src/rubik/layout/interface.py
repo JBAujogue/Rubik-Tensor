@@ -5,7 +5,7 @@ from rubik.cube import Cube
 from rubik.layout.plot import plot_cube
 
 
-def demo(size: int = 3):
+def interface(size: int = 3):
     cube = Cube(size=size)
     cube.rotate("X0")
     cube.scramble(num_moves=1000, seed=0)

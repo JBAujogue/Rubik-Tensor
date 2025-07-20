@@ -17,7 +17,7 @@ pre-commit install
 ### Launch the web interface
 
 ```shell
-python -m rubik demo
+python -m rubik interface
 ```
 
 ### Use the python API

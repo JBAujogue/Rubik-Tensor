@@ -1,6 +1,6 @@
 from fire import Fire
 
-from rubik.layout.demo import demo
+from rubik.layout.interface import interface
 
 
-Fire({"demo": demo})
+Fire({"interface": interface})

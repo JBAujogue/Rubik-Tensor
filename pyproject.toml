@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "cupy-cuda12x>=13.4.1",
     "fire>=0.7.0",
     "gradio>=4.26.0",
     "loguru>=0.7.3",

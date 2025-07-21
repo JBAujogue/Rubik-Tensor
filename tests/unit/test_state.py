@@ -2,7 +2,7 @@ import pytest
 
 import torch
 
-from rubik.tensor_utils import build_cube_tensor, build_permutation_matrix
+from rubik.state import build_cube_tensor, build_permutation_matrix
 
 
 @pytest.mark.parametrize("size", [2, 3, 5, 20])
@@ -10,7 +10,7 @@ def test_build_cube_tensor(size: int):
     """
     Test that build_cube_tensor behaves as expected.
     """
-    tensor = build_cube_tensor(colors=["U", "L", "C", "R", "B", "D"], size=size)
+    tensor = build_cube_tensor(size)
     facets = tensor.to_dense().to(dtype=torch.int8) != 0
     x_sums = facets.sum(dim=(0, 2, 3)).tolist()
     y_sums = facets.sum(dim=(0, 1, 3)).tolist()

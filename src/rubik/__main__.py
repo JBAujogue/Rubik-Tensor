@@ -1,4 +1,6 @@
-# from fire import Fire
+from fire import Fire
+
+from rubik.interface.app import app
 
 
-# Fire({"hello": hello_world})
+Fire({"interface": app})

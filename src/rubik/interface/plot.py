@@ -7,6 +7,7 @@ import torch
 class CubeVisualizer:
     """
     Utility class for ploting a cube, with some layout ingredients precomputed at init.
+    Greatly inspired from https://www.kaggle.com/code/edomingo/nxn-rubik-s-cube-3d-interactive-viz-plotly/notebook.
     """
 
     def __init__(self, size: int):

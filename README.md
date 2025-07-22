@@ -67,8 +67,6 @@ cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
 
 #### Base solvers following rule-based policies
 
-
-
 ## References
 
 ### Implementations & rule-based solvers

@@ -7,7 +7,7 @@ This project uses `uv 0.7` as environment & dependency manager, and `python 3.11
 
 ```shell
 uv venv
--- Activate env --
+(Activate env)
 uv sync
 pre-commit install
 ```
@@ -67,13 +67,11 @@ cube.rotate('X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i')
 
 #### Base solvers following rule-based policies
 
-
-
 ## References
 
-### Python implementations & rule-based solvers
+### Implementations & rule-based solvers
 
-Open-source projects related to Rubik's Cube, sorted by number of stars:
+Open-source projects related to Rubik's Cube:
 - [adrianliaw/PyCuber](https://github.com/adrianliaw/PyCuber)
 - [pglass/cube](https://github.com/pglass/cube)
 - [dwalton76/rubiks-cube-NxNxN-solver](https://github.com/dwalton76/rubiks-cube-NxNxN-solver)
@@ -81,6 +79,7 @@ Open-source projects related to Rubik's Cube, sorted by number of stars:
 - [trincaog/magiccube](https://github.com/trincaog/magiccube)
 - [charlstown/rubiks-cube-solver](https://github.com/charlstown/rubiks-cube-solver)
 - [staetyk/NxNxN-Cubes](https://github.com/staetyk/NxNxN-Cubes)
+- [wata-orz/santa2023_permutation_puzzle](https://github.com/wata-orz/santa2023_permutation_puzzle/tree/main)
 
 ### Machine Learning based solver models
 

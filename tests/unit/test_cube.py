@@ -16,8 +16,8 @@ class TestCube:
         Test that the __init__ method produce expected attributes.
         """
         cube = Cube(size)
-        assert cube.state.shape == (6 * (size**2), 7), f"'state' has incorrect shape {cube.state.shape}"
-        assert cube.actions.shape == (3, size, 2, cube.state.shape[0], cube.state.shape[0]), (
+        assert cube.state.shape == (6 * (size**2),), f"'state' has incorrect shape {cube.state.shape}"
+        assert cube.actions.shape == (3, size, 2, cube.state.shape[0]), (
             f"'actions' has incorrect shape {cube.actions.shape}"
         )
         assert len(cube.history) == 0, "'history' field should be empty"
@@ -93,23 +93,22 @@ class TestCube:
             "X2 X1i Y1i Z1i Y0 Z0i X2 X1i Y1i Z1i Y0 Z0i " * 2,
         ],
     )
-    def test_compute_changes(self, moves: str):
+    def test_compose_moves(self, moves: str):
         """
-        Test that the .compute_changes method behaves as expected.
+        Test that the .compose_moves method behaves as expected.
         """
         cube = Cube(3)
-        facets = cube.state.argmax(dim=-1).to(cube.dtype).tolist()
-        changes = cube.compute_changes(moves)
 
         # apply changes induced by moves using the permutation dict returned by 'compute_changes'
-        expected = [facets[changes.get(i, i)] for i in range(len(facets))]
+        changes = cube.compose_moves(moves)
+        expected = torch.gather(cube.state.clone(), 0, changes)
 
         # apply changes induced by moves using the optimized 'rotate' method
         cube.rotate(moves)
-        observed = cube.state.argmax(dim=-1).to(cube.dtype).tolist()
+        observed = cube.state
 
         # assert the tow are identical
-        assert expected == observed, "method 'compute_changes' does not behave correctly: "
+        assert torch.equal(expected, observed), "method 'compute_changes' does not behave correctly: "
 
     def test__str__len(self):
         """

@@ -7,7 +7,7 @@ This project uses `uv 0.7` as environment & dependency manager, and `python 3.11
 
 ```shell
 uv venv
--- Activate env --
+(Activate env)
 uv sync
 pre-commit install
 ```

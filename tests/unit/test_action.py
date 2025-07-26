@@ -8,7 +8,7 @@ from rubik.action import (
     POS_SHIFTS,
     FACE_ROTATIONS,
     build_actions_tensor,
-    build_action_tensor,
+    build_action_permutation,
     parse_action_str,
     parse_actions_str,
     sample_actions_str,
@@ -96,7 +96,7 @@ def test_build_actions_tensor_shape(size: int):
     """
     Test that "build_actions_tensor" output has expected shape.
     """
-    expected = (3, size, 2, 6 * (size**2), 6 * (size**2))
+    expected = (3, size, 2, 6 * (size**2))
     observed = build_actions_tensor(size).shape
     assert expected == observed, (
         f"'build_actions_tensor' output has incorrect shape: expected shape '{expected}', got '{observed}' instead"
@@ -111,14 +111,14 @@ def test_build_actions_tensor_shape(size: int):
         (5, 1, 4, 0),
     ],
 )
-def test_build_action_tensor_shape(size: int, axis: int, slice: int, inverse: int):
+def test_build_action_permutation(size: int, axis: int, slice: int, inverse: int):
     """
     Test that "build_actions_tensor" output has expected shape.
     """
-    expected = (3, size, 2, 6 * (size**2), 6 * (size**2))
-    observed = build_action_tensor(size, axis, slice, inverse).shape
+    expected = 6 * (size**2)
+    observed = len(build_action_permutation(size, axis, slice, inverse))
     assert expected == observed, (
-        f"'build_action_tensor' output has incorrect shape: expected shape '{expected}', got '{observed}' instead"
+        f"'build_action_tensor' output has incorrect length: expected length '{expected}', got '{observed}'"
     )
 
 

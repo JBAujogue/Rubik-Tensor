@@ -109,7 +109,7 @@ class CubeVisualizer:
         Generates a 3D plot of a cube given its coordinates, state and size.
         """
         # set the color of each facelet, face after face
-        face_state = (state.argmax(dim=-1) - 1).reshape(6, -1).tolist()
+        face_state = (state - 1).reshape(6, -1).tolist()
         face_colors = [[self.colors[f] for f in face] for face in face_state]
 
         face_coordinates = [coordinates[1:, (coordinates[0] == i)].transpose(0, 1).tolist() for i in range(6)]

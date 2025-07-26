@@ -17,7 +17,7 @@ POS_ROTATIONS = torch.stack(
                 [0, 0, 0, 1],
                 [0, 0, -1, 0],
             ],
-            dtype=torch.int32,
+            dtype=torch.int64,
         ),
         # rot about Y: X -> Z
         torch.tensor(
@@ -27,7 +27,7 @@ POS_ROTATIONS = torch.stack(
                 [0, 0, 1, 0],
                 [0, 1, 0, 0],
             ],
-            dtype=torch.int32,
+            dtype=torch.int64,
         ),
         # rot about Z: Y -> X
         torch.tensor(
@@ -37,7 +37,7 @@ POS_ROTATIONS = torch.stack(
                 [0, -1, 0, 0],
                 [0, 0, 0, 1],
             ],
-            dtype=torch.int32,
+            dtype=torch.int64,
         ),
     ]
 )
@@ -48,7 +48,7 @@ POS_SHIFTS = torch.tensor(
         [0, 1, 0, 0],
         [0, 0, 1, 0],
     ],
-    dtype=torch.int32,
+    dtype=torch.int64,
 )
 
 
@@ -66,30 +66,30 @@ FACE_ROTATIONS = torch.stack(
 
 def build_actions_tensor(size: int) -> torch.Tensor:
     """
-    Built the 5D tensor carrying all rotations of a cube as matrix multiplication.
+    Built the 4D tensor carrying all rotations of a cube as index permutation.
     """
-    return torch.stack(
+    return torch.tensor(
         [
-            build_action_tensor(size=size, axis=axis, slice=slice, inverse=inverse)
+            [
+                [build_action_permutation(size=size, axis=axis, slice=slice, inverse=inverse) for inverse in range(2)]
+                for slice in range(size)
+            ]
             for axis in range(3)
-            for slice in range(size)
-            for inverse in range(2)
         ],
-        dim=0,
-    ).sum(dim=0, dtype=torch.int32)
+        dtype=torch.int64,
+    )
 
 
-def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch.Tensor:
+def build_action_permutation(size: int, axis: int, slice: int, inverse: int) -> list[int]:
     """
-    Compute the sparse permutation tensor whose effect on a position-frozen color vector
-    is the rotation along the specified axis, within the specified slice and the specified
-    orientation.
+    Compute the permutation list whose effect on a position-frozen color vector is the rotation
+    along the specified axis, within the specified slice and the specified orientation.
     """
-    tensor = build_cube_tensor(size).to(dtype=torch.int32)
+    tensor = build_cube_tensor(size).to(dtype=torch.int64)
     length = 6 * (size**2)
 
     # extract faces impacted by the move
-    indices = tensor.indices().to(dtype=torch.int32)  # size = (4, length)
+    indices = tensor.indices().to(dtype=torch.int64)  # size = (4, length)
     changes = (indices[axis + 1] == slice).nonzero().reshape(-1)  # size = (n,), n < length
     extract = indices[:, changes]  # size = (4, n)
 
@@ -99,7 +99,7 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     rotated = rotated + offsets  # size = (4, n)
 
     # apply face rotation
-    rotated[0] = (F.one_hot(rotated[0].long(), num_classes=6).to(torch.int32) @ FACE_ROTATIONS[axis]).argmax(dim=-1)
+    rotated[0] = (F.one_hot(rotated[0].long(), num_classes=6).to(torch.int64) @ FACE_ROTATIONS[axis]).argmax(dim=-1)
 
     # from this point on, convert rotation into a position-based permutation of colors
     (inputs, outputs) = (rotated, extract) if bool(inverse) else (extract, rotated)
@@ -107,28 +107,12 @@ def build_action_tensor(size: int, axis: int, slice: int, inverse: int) -> torch
     outputs = outputs.transpose(0, 1).tolist()  # size = (n, 4)
 
     # compute position-based permutation of colors equivalent to rotation converting inputs into outputs
+    local_perm = {i: outputs.index(inputs[i]) for i in range(len(inputs))}
     local_to_total = dict(enumerate(changes.tolist()))
     total_to_local = {ind: i for i, ind in local_to_total.items()}
 
-    local_perm = {i: outputs.index(inputs[i]) for i in range(len(inputs))}
-    total_perm = {
-        i: (i if i not in total_to_local else local_to_total[local_perm[total_to_local[i]]]) for i in range(length)
-    }
-
-    # convert permutation dict into sparse tensor
-    perm_indices = torch.tensor(
-        [
-            [axis] * length,
-            [slice] * length,
-            [inverse] * length,
-            list(total_perm.keys()),
-            list(total_perm.values()),
-        ],
-        dtype=torch.int32,
-    )
-    perm_values = torch.tensor([1] * length, dtype=torch.int32)
-    perm_size = (3, size, 2, length, length)
-    return torch.sparse_coo_tensor(indices=perm_indices, values=perm_values, size=perm_size, dtype=torch.int32)
+    # return permutation on total list of facelet positions
+    return [(i if i not in total_to_local else local_to_total[local_perm[total_to_local[i]]]) for i in range(length)]
 
 
 def parse_action_str(move: str) -> tuple[int, int, int]:

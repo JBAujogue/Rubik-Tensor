@@ -2,7 +2,6 @@ from functools import reduce
 from loguru import logger
 
 import torch
-import torch.nn.functional as F
 
 from rubik.action import build_actions_tensor, parse_actions_str, sample_actions_str
 from rubik.state import build_cube_tensor
@@ -26,10 +25,11 @@ class Cube:
         """
         tensor = build_cube_tensor(size)
 
-        self.dtype = torch.int8 if size <= 6 else torch.int16 if size <= 73 else torch.int32
-        self.coordinates = tensor.indices().to(self.dtype)
-        self.state = F.one_hot(tensor.values().long(), num_classes=7).to(self.dtype)
-        self.actions = build_actions_tensor(size).to(self.dtype)
+        self.dtype = torch.int64
+        self.coordinates = tensor.indices()
+        self.state = tensor.values()
+        self.actions = build_actions_tensor(size)
+        # internal-only attributes
         self._history: list[tuple[int, int, int]] = []
         self._colors: list[str] = list("ULCRBD")
         self._size: int = size
@@ -54,7 +54,7 @@ class Cube:
         """
         tensor = torch.sparse_coo_tensor(
             indices=self.coordinates,
-            values=self.state.argmax(dim=-1),
+            values=self.state,
             size=(6, self.size, self.size, self.size),
             dtype=self.dtype,
         ).to_dense()
@@ -72,13 +72,7 @@ class Cube:
 
     def to(self, device: str | torch.device) -> "Cube":
         device = torch.device(device)
-        dtype = (
-            self.state.dtype
-            if self.state.device == device
-            else self.dtype
-            if device == torch.device("cpu")
-            else torch.float32
-        )
+        dtype = self.dtype if device == torch.device("cpu") else torch.float32
         self.state = self.state.to(device=device, dtype=dtype)
         self.actions = self.actions.to(device=device, dtype=dtype)
         logger.info(f"Using device '{self.state.device}' and dtype '{dtype}'")
@@ -114,18 +108,17 @@ class Cube:
         Apply a move (defined as 3 coordinates) to the cube.
         """
         action = self.actions[axis, slice, inverse]
-        self.state = action @ self.state
+        self.state = torch.gather(self.state, 0, action)
         self._history.append((axis, slice, inverse))
         return
 
-    def compute_changes(self, moves: str) -> dict[int, int]:
+    def compose_moves(self, moves: str) -> torch.Tensor:
         """
         combine a sequence of moves and return the resulting changes.
         """
         actions = parse_actions_str(moves)
-        tensors = [self.actions[*action].to(torch.float32) for action in actions]
-        result = reduce(lambda A, B: B @ A, tensors).to(torch.int16).coalesce()
-        return dict(result.indices().transpose(0, 1).tolist())
+        tensors = [self.actions[*action] for action in actions]
+        return reduce(lambda A, B: torch.gather(A, 0, B), tensors)
 
     def __str__(self):
         """

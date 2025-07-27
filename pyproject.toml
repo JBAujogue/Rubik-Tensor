@@ -3,15 +3,18 @@ name = "rubik-tensor"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11,<3.12"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "fire>=0.7.0",
     "gradio>=5.38",
     "loguru>=0.7.3",
     "plotly>=6.2.0",
-    "pydantic>=2.11.7",
-    "torch>=2.7.1",
 ]
+
+[project.optional-dependencies]
+torch = [ "torch>=2.7.1" ]
+torch-cpu = [ "torch>=2.7.1" ]
+torch-cu126 = [ "torch>=2.7.1" ]
 
 [dependency-groups]
 dev = [
@@ -25,13 +28,34 @@ dev = [
 
 [tool.uv]
 package = true
+conflicts = [
+    [
+        { extra = "torch" },
+        { extra = "torch-cpu" },
+        { extra = "torch-cu126" },
+    ],
+]
 
 [tool.uv.sources]
-torch = { index = "torch-cu126" }
+torch = [
+    { extra = "torch", index = "pypi" },
+    { extra = "torch-cpu", index = "torch-cpu" },
+    { extra = "torch-cu126", index = "torch-cu126" },
+]
+
+[[tool.uv.index]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [[tool.uv.index]]
 name = "torch-cu126"
 url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
 
 [tool.ruff]
 line-length = 120

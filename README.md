@@ -1,16 +1,32 @@
 # Rubik-Tensor
 
+---
+title: Rubik Tensor
+emoji: ⚡
+colorFrom: blue
+colorTo: blue
+sdk: docker
+pinned: false
+license: apache-2.0
+short_description: Interface for playing with Rubik cubes of any size
+---
+
+See the HF Space [JBAujogue/Rubik-Tensor](https://huggingface.co/spaces/JBAujogue/Rubik-Tensor)
 
 ## Setup
 
-This project uses `uv 0.7` as environment & dependency manager, and `python 3.11` as core interpreter. Install the project with
+This project uses `uv 0.8.3` as environment & dependency manager, and `python 3.11` as core interpreter. Install the project with
 
 ```shell
 uv venv
 (Activate env)
-uv sync
+uv sync --extra [extra]
 pre-commit install
 ```
+where `extra` should be one of the following:
+- `torch`: pytorch package released on pypi (cpu-only form non-linux systems, cuda-enabled for linux systems).
+- `torch-cpu`: cpu-only torch wheel. 
+- `torch-cu126`: cuda 12.6-compatible torch wheel. 
 
 ## Usage
 

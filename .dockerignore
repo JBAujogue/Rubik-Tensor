@@ -1,13 +1,11 @@
 .coverage
 .env
-.venv
 .mypy_cache
-.vscode
-.ruff_cache
-.ipynb_checkpoints
 .pytest_cache
+.ruff_cache
+.venv
+.vscode
 
 *egg-info
 
-__pycache__
 notebooks

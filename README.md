@@ -11,7 +11,7 @@ short_description: Interface for playing with Rubik cubes of any size
 
 # Rubik-Tensor
 
-See the HF Space [JBAujogue/Rubik-Tensor](https://huggingface.co/spaces/JBAujogue/Rubik-Tensor)
+See the HF Space [JBAujogue/Rubik-Tensor](https://huggingface.co/spaces/JBAujogue/Rubik-Tensor) (make sure to accept 3rd-party cookies through the `Eye` icon of the URL bar).
 
 ## Setup
 

@@ -4,7 +4,7 @@ emoji: ⚡
 colorFrom: blue
 colorTo: blue
 sdk: docker
-pinned: false
+pinned: true
 license: apache-2.0
 short_description: Interface for playing with Rubik cubes of any size
 ---

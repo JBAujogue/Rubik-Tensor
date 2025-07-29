@@ -1,0 +1,10 @@
+.coverage
+.env
+.venv
+.mypy_cache
+.vscode
+.ruff_cache
+.pytest_cache
+*egg-info
+
+notebooks

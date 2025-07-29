@@ -1,17 +1,34 @@
-FROM python:3.11-slim-bookworm
 
-# Get uv from distro-less image
+FROM python:3.11-slim-bookworm AS base
+
+# --- Build stage ---
+
+FROM base AS builder
+
 COPY --from=ghcr.io/astral-sh/uv:0.8.3 / uv / uvx / bin/
 
-ADD . /app
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 WORKDIR /app
 
-RUN uv sync --locked --extra torch-cpu
+COPY uv.lock pyproject.toml /app/
+
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --extra torch-cpu --no-install-project
+
+COPY . /app
+
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --extra torch-cpu
+
+# --- Final stage ---
+
+FROM base
+
+COPY --from=builder /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 7860
 
 ENTRYPOINT [ "python", "-m", "rubik", "interface" ]
+
 CMD []

@@ -8,9 +8,13 @@ This project uses `uv 0.8.3` as environment & dependency manager, and `python 3.
 ```shell
 uv venv
 (Activate env)
-uv sync
+uv sync --extra [extra]
 pre-commit install
 ```
+where `extra` should be one of the following:
+- `torch`: pytorch package released on pypi (cpu-only form non-linux systems, cuda-enabled for linux systems).
+- `torch-cpu`: cpu-only torch wheel. 
+- `torch-cu126`: cuda 12.6-compatible torch wheel. 
 
 ## Usage
 

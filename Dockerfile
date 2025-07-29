@@ -13,15 +13,24 @@ WORKDIR /app
 
 COPY uv.lock pyproject.toml /app/
 
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --extra torch-cpu --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+    --frozen \
+    --extra torch-cpu \
+    --no-dev \
+    --no-install-project
 
 COPY . /app
 
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --extra torch-cpu
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync \
+    --frozen \
+    --extra torch-cpu \
+    --no-dev
 
 # --- Final stage ---
 
-FROM base
+FROM base AS final
 
 COPY --from=builder /app /app
 

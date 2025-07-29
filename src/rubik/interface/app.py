@@ -6,7 +6,7 @@ from rubik.cube import Cube
 from rubik.interface.plot import CubeVisualizer
 
 
-def app(default_size: int = 3):
+def app(default_size: int = 3, server_port: int = 7860):
     """
     Interface with the following features:
         - create a cube of the specified size.
@@ -62,5 +62,5 @@ def app(default_size: int = 3):
         scramble_btn.click(scramble_cube, inputs=num_moves).success(display_cube, None, plot)
         rotate_btn.click(rotate_cube, inputs=moves).success(display_cube, None, plot)
 
-    demo.launch()
+    demo.launch(server_name="0.0.0.0", server_port=server_port)
     return

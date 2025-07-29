@@ -1,5 +1,17 @@
 # Rubik-Tensor
 
+---
+title: Rubik Tensor
+emoji: ⚡
+colorFrom: blue
+colorTo: blue
+sdk: docker
+pinned: false
+license: apache-2.0
+short_description: Interface for playing with Rubik cubes of any size
+---
+
+See the HF Space [JBAujogue/Rubik-Tensor](https://huggingface.co/spaces/JBAujogue/Rubik-Tensor)
 
 ## Setup
 

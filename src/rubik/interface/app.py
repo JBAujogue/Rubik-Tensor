@@ -15,20 +15,20 @@ def app(default_size: int = 3, server_port: int = 7860):
         - display a cube upon creation or update.
     """
 
-    def create_cube(size) -> tuple[gr.State, gr.State]:
+    def create(size) -> tuple[gr.State, gr.State]:
         cube = Cube(size)
         cube_visualizer = CubeVisualizer(size)
         return cube, cube_visualizer
 
-    def scramble_cube(num_moves: int, cube: gr.State) -> gr.State:
+    def scramble(num_moves: int, cube: gr.State) -> gr.State:
         cube.scramble(num_moves, seed=0)
         return cube
 
-    def rotate_cube(moves: str, cube: gr.State) -> gr.State:
+    def rotate(moves: str, cube: gr.State) -> gr.State:
         cube.rotate(moves)
         return cube
 
-    def display_cube(cube: gr.State, cube_visualizer: gr.State) -> go.Figure:
+    def display(cube: gr.State, cube_visualizer: gr.State) -> go.Figure:
         layout_args = {"autosize": False, "width": 600, "height": 600}
         return cube_visualizer(cube.coordinates, cube.state, cube.size).update_layout(**layout_args)
 
@@ -53,12 +53,10 @@ def app(default_size: int = 3, server_port: int = 7860):
                 plot = gr.Plot(None, container=False)
 
         # interactions
-        demo.load(create_cube, size, [cube, cube_visualizer]).success(display_cube, [cube, cube_visualizer], plot)
-        create_btn.click(create_cube, size, [cube, cube_visualizer]).success(
-            display_cube, [cube, cube_visualizer], plot
-        )
-        scramble_btn.click(scramble_cube, [num_moves, cube], cube).success(display_cube, [cube, cube_visualizer], plot)
-        rotate_btn.click(rotate_cube, [moves, cube], cube).success(display_cube, [cube, cube_visualizer], plot)
+        demo.load(create, size, [cube, cube_visualizer]).success(display, [cube, cube_visualizer], plot)
+        create_btn.click(create, size, [cube, cube_visualizer]).success(display, [cube, cube_visualizer], plot)
+        scramble_btn.click(scramble, [num_moves, cube], cube).success(display, [cube, cube_visualizer], plot)
+        rotate_btn.click(rotate, [moves, cube], cube).success(display, [cube, cube_visualizer], plot)
 
     demo.launch(server_name="0.0.0.0", server_port=server_port)
     return

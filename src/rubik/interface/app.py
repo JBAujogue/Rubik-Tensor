@@ -14,29 +14,21 @@ def app(default_size: int = 3, server_port: int = 7860):
         - ability to rotate it through a text field.
         - display a cube upon creation or update.
     """
-    cube = Cube(default_size)
-    cube_visualizer = CubeVisualizer(default_size)
 
-    def create_cube(size) -> None:
-        nonlocal cube
-        nonlocal cube_visualizer
+    def create(size) -> tuple[gr.State, gr.State]:
         cube = Cube(size)
         cube_visualizer = CubeVisualizer(size)
-        return
+        return cube, cube_visualizer
 
-    def scramble_cube(num_moves: int) -> None:
-        nonlocal cube
+    def scramble(num_moves: int, cube: gr.State) -> gr.State:
         cube.scramble(num_moves, seed=0)
-        return
+        return cube
 
-    def rotate_cube(moves: str) -> None:
-        nonlocal cube
+    def rotate(moves: str, cube: gr.State) -> gr.State:
         cube.rotate(moves)
-        return
+        return cube
 
-    def display_cube() -> go.Figure:
-        nonlocal cube
-        nonlocal cube_visualizer
+    def display(cube: gr.State, cube_visualizer: gr.State) -> go.Figure:
         layout_args = {"autosize": False, "width": 600, "height": 600}
         return cube_visualizer(cube.coordinates, cube.state, cube.size).update_layout(**layout_args)
 
@@ -45,6 +37,9 @@ def app(default_size: int = 3, server_port: int = 7860):
         gr.Markdown("Rubik's Cube Interface")
         with gr.Row():
             with gr.Column(scale=15):
+                cube = gr.State(None)
+                cube_visualizer = gr.State(None)
+
                 size = gr.Slider(1, 100, value=default_size, step=1, label="Select a size")
                 create_btn = gr.Button("Generate a Cube")
 
@@ -55,12 +50,13 @@ def app(default_size: int = 3, server_port: int = 7860):
                 rotate_btn = gr.Button("Rotate the Cube")
 
             with gr.Column(scale=85):
-                plot = gr.Plot(display_cube(), container=False)
+                plot = gr.Plot(None, container=False)
 
         # interactions
-        create_btn.click(create_cube, inputs=size).success(display_cube, None, plot)
-        scramble_btn.click(scramble_cube, inputs=num_moves).success(display_cube, None, plot)
-        rotate_btn.click(rotate_cube, inputs=moves).success(display_cube, None, plot)
+        demo.load(create, size, [cube, cube_visualizer]).success(display, [cube, cube_visualizer], plot)
+        create_btn.click(create, size, [cube, cube_visualizer]).success(display, [cube, cube_visualizer], plot)
+        scramble_btn.click(scramble, [num_moves, cube], cube).success(display, [cube, cube_visualizer], plot)
+        rotate_btn.click(rotate, [moves, cube], cube).success(display, [cube, cube_visualizer], plot)
 
     demo.launch(server_name="0.0.0.0", server_port=server_port)
     return

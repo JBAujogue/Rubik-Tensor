@@ -3,4 +3,5 @@ from fire import Fire
 from rubik.interface.app import app
 
 
-Fire({"interface": app})
+if __name__ == "__main__":
+    Fire({"interface": app})

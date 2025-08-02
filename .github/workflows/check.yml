@@ -3,6 +3,9 @@ name: Sanity checks
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   check-files:
     runs-on: ubuntu-latest

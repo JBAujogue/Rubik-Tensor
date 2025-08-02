@@ -1,11 +1,5 @@
 name: Sanity checks
-
-on:
-  pull_request:
-
-permissions:
-  contents: read
-
+on: [pull_request]
 jobs:
   check-files:
     runs-on: ubuntu-latest

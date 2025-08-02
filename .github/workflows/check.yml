@@ -1,10 +1,20 @@
 name: Sanity checks
 on: [pull_request]
 jobs:
-  check-files:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check large files
-        uses: ActionsDesk/lfs-warning@v2.0
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          filesizelimit: 10485760 # 10MB
+          python-version-file: ".python-version"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.3"
+          enable-cache: true
+      - name: Install project
+        run: uv sync --locked --extra torch-cpu
+      - name: Run tests
+        run: uv run pytest tests/unit
